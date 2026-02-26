@@ -745,26 +745,76 @@
       overflow: hidden;
     }
 
+    /* toggle manual/cards */
+    .input-mode-toggle {
+      display: flex;
+      background: var(--dark3);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, .08);
+      padding: 0;
+    }
+
+    .imt-btn {
+      flex: 1;
+      text-align: center;
+      padding: 10px 18px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, .4);
+      cursor: pointer;
+      min-width: 74px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      justify-content: center;
+    }
+
+    .imt-btn.on {
+      background: var(--gold);
+      color: var(--dark);
+      font-weight: 600;
+    }
+
+    /* round info bar */
     .round-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 14px 20px 10px;
-      border-bottom: 1px solid rgba(255, 255, 255, .06);
+      padding: 10px 16px;
+      background: var(--dark2);
+      border-bottom: 1px solid rgba(255, 255, 255, .05);
       flex-shrink: 0;
     }
 
+    .round-label-wrapper {
+      flex: 1;
+      display: flex;
+      justify-content: flex-start;
+    }
+
+    .round-meta-wrapper {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+    }
+
+    .toggle-wrapper {
+      flex: 1;
+      display: flex;
+      justify-content: flex-end;
+    }
+
     .round-label {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 26px;
-      color: var(--gold);
-      letter-spacing: .04em;
+      font-size: 20px;
+      color: var(--teal);
+      letter-spacing: .06em;
     }
 
     .round-meta {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
     }
 
     .scoreboard-scroll {
@@ -1418,7 +1468,7 @@
       border-top: 1px solid rgba(255, 255, 255, .06);
       background: var(--dark2);
       padding: 10px 14px 12px;
-      min-height: 230px;
+      height: 250px;
       display: flex;
       flex-direction: column;
     }
@@ -2306,9 +2356,13 @@
     <!-- ══════════════════ SIMPLE GAME ══════════════════ -->
     <div id="screen-simple" class="screen">
       <div class="round-bar">
-        <div class="round-label bb">RODADA <span id="s-round-num">1</span></div>
-        <div class="round-meta">
+        <div class="round-label-wrapper">
+          <div class="round-label bb">RODADA <span id="s-round-num">1</span></div>
+        </div>
+        <div class="round-meta-wrapper">
           <span class="badge badge-gold" id="s-meta-badge">META: 200</span>
+        </div>
+        <div class="toggle-wrapper">
           <div class="input-mode-toggle">
             <div class="imt-btn on" id="imt-manual"
               onclick="Simple.setInputMode('manual');this.classList.add('on');document.getElementById('imt-cards').classList.remove('on');">
@@ -2330,6 +2384,26 @@
 
     <!-- ══════════════════ DYNAMIC GAME ══════════════════ -->
     <div id="screen-dynamic" class="screen">
+      <div class="round-bar">
+        <div class="round-label-wrapper">
+          <div class="round-label bb">RODADA <span id="d-round-num">1</span></div>
+        </div>
+        <div class="round-meta-wrapper">
+          <span class="badge badge-gold" id="d-meta-badge">META: 200</span>
+        </div>
+        <div class="toggle-wrapper">
+          <div class="input-mode-toggle">
+            <div class="imt-btn on" id="d-diff-easy"
+              onclick="Dyn.setDynDiff('easy');this.classList.add('on');document.getElementById('d-diff-hard').classList.remove('on');">
+              <span>🟢</span><span>Fácil</span>
+            </div>
+            <div class="imt-btn" id="d-diff-hard"
+              onclick="Dyn.setDynDiff('hard');this.classList.add('on');document.getElementById('d-diff-easy').classList.remove('on');">
+              <span>🔴</span><span>Difícil</span>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="mini-scores" id="d-mini-scores"></div>
       <div style="height:1px;background:rgba(255,255,255,.06);flex-shrink:0;"></div>
 
@@ -3077,8 +3151,32 @@
         return false;
       }
 
+      function setDynDiff(diff) {
+        G.state.difficulty = diff;
+        G.save();
+        render(); // Re-render to show/hide the deck count logic
+      }
+
       /* ── RENDER ────────────────────────────── */
       function render() {
+        // Update header details
+        const s = G.state;
+        const rn = document.getElementById('d-round-num');
+        if (rn) rn.textContent = s.round;
+        const mb = document.getElementById('d-meta-badge');
+        if (mb) mb.textContent = 'META: ' + s.meta;
+
+        // Sync custom toggle visual logic directly from G state initialization
+        const dde = document.getElementById('d-diff-easy');
+        const ddh = document.getElementById('d-diff-hard');
+        if (dde && ddh) {
+          if (s.difficulty === 'hard') {
+            ddh.classList.add('on'); dde.classList.remove('on');
+          } else {
+            dde.classList.add('on'); ddh.classList.remove('on');
+          }
+        }
+
         renderMiniScores();
         renderActiveZone();
         renderInlinePicker();
