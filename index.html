@@ -1475,9 +1475,6 @@
 
     #ip-content {
       flex: 1;
-      overflow-y: auto;
-      padding-bottom: 20px;
-      /* Extra room so it's not strictly tight */
     }
 
     .ip-tabs {
@@ -1521,8 +1518,9 @@
 
     .ip-grid-acts {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 5px;
+      grid-template-columns: repeat(3, 75px);
+      justify-content: center;
+      gap: 8px;
     }
 
     .ip-card {
