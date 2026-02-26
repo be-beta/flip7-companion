@@ -1475,6 +1475,9 @@
 
     #ip-content {
       flex: 1;
+      overflow-y: auto;
+      padding-bottom: 20px;
+      /* Extra room so it's not strictly tight */
     }
 
     .ip-tabs {
@@ -3786,7 +3789,7 @@
         ipTab, selectCard, reloadDeck,
         dismissBust, showFlip7, dismissFlip7,
         applyFreeze, pickFlip3Card, modalSelectCard,
-        pickTab,
+        pickTab, setDynDiff,
       };
     })();
 

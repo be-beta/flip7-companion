@@ -1,4 +1,4 @@
-const CACHE_NAME = "flip7-cache-v4";
+const CACHE_NAME = "flip7-cache-v5";
 const urlsToCache = [
   "./",
   "./index.html",
