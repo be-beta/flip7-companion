@@ -446,32 +446,18 @@
     }
 
     .mode-card.selected .mode-icon.bolt {
-      animation: boltZap .45s cubic-bezier(.22, 1, .36, 1);
+      animation: pulseGlow 1.2s ease-in-out infinite alternate;
     }
 
-    @keyframes boltZap {
-      0% {
-        transform: scale(1) rotate(0deg);
+    @keyframes pulseGlow {
+      from {
+        transform: scale(1);
+        text-shadow: 0 0 10px rgba(245, 200, 66, 0.4);
       }
 
-      15% {
-        transform: scale(1.7) rotate(-15deg) translateY(-4px);
-      }
-
-      30% {
-        transform: scale(.8) rotate(12deg);
-      }
-
-      50% {
-        transform: scale(1.4) rotate(-8deg) translateY(-2px);
-      }
-
-      70% {
-        transform: scale(.95) rotate(4deg);
-      }
-
-      100% {
-        transform: scale(1) rotate(0deg);
+      to {
+        transform: scale(1.15);
+        text-shadow: 0 0 25px rgba(245, 200, 66, 0.8), 0 0 40px rgba(245, 200, 66, 0.4);
       }
     }
 
@@ -797,6 +783,7 @@
       border-radius: var(--r);
       overflow: hidden;
       transition: border-color .2s;
+      flex-shrink: 0;
     }
 
     .ssc.leading {
@@ -995,6 +982,11 @@
       transition: all .15s;
       color: rgba(255, 255, 255, .35);
       background: transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
     }
 
     .imt-btn.on {
@@ -2883,10 +2875,6 @@
             ${handHtml}
             ${numGrid}
             <div style="margin-top:5px;">${modGrid}</div>
-            <div class="bust-row ${ri.bust ? 'on' : ''}" id="sb-${i}" onclick="Simple.toggleBust(${i})" style="margin-top:8px;">
-              <div class="bust-box">${ri.bust ? '✕' : ''}</div>
-              <span class="bust-lbl">Estourou (0 pts)</span>
-            </div>
           </div>`;
           } else {
             inputHtml = `
@@ -2897,10 +2885,6 @@
               <input class="num-input" type="number" id="si-${i}" value="${ri.pts}"
                 oninput="Simple.setPts(${i},this.value)" inputmode="numeric" min="0"/>
               <div class="step-btn" onclick="Simple.step(${i},1)">＋</div>
-            </div>
-            <div class="bust-row ${ri.bust ? 'on' : ''}" id="sb-${i}" onclick="Simple.toggleBust(${i})">
-              <div class="bust-box">${ri.bust ? '✕' : ''}</div>
-              <span class="bust-lbl">Estourou (0 pts)</span>
             </div>
           </div>`;
           }
@@ -2987,11 +2971,18 @@
         sum.innerHTML = '';
         s.players.forEach((p, i) => {
           const ri = s.sRoundInputs[i];
-          const pts = ri.bust ? 0 : (s.sInputMode === 'cards' ? calcDynPts(ri.hand) : ri.pts || 0);
+          const isCards = s.sInputMode === 'cards';
+          let pts = isCards ? calcDynPts(ri.hand) : (ri.pts || 0);
+          let isBust = ri.bust || (!isCards && pts === 0) || (isCards && pts === 0 && ri.hand.length > 0 && uniqueNums(ri.hand).some(n => ri.sDeckUsed['num:' + n] > 1));
+
+          if (!isCards && pts === 0) {
+            isBust = true;
+          }
+
           const row = document.createElement('div');
           row.className = 'summary-row';
           row.innerHTML = `<span class="sum-name">${esc(p.name)}</span>
-        <span class="sum-pts ${ri.bust ? 'bust' : pts === 0 ? 'zero' : ''}">${ri.bust ? 'BUST' : '+' + pts}</span>`;
+        <span class="sum-pts ${isBust ? 'bust' : pts === 0 ? 'zero' : ''}">${isBust ? 'BUST' : '+' + pts}</span>`;
           sum.appendChild(row);
         });
         document.getElementById('modal-round-confirm').onclick = applyRound;
@@ -3356,32 +3347,29 @@
         showRoundEndModal();
       }
 
-      /* ── FREEZE ────────────────────────────── */
       function resolveFreeze(fromIdx) {
         const s = G.state;
-        const targets = s.players
-          .map((p, i) => ({ p, i }))
-          .filter(({ i }) => s.dPlayerStates[i].status === 'active'); // inclui o próprio jogador
+        // Get all players but flag if they are active
+        const targets = s.players.map((p, i) => ({ p, i, active: s.dPlayerStates[i].status === 'active', status: s.dPlayerStates[i].status }));
 
-        if (targets.length === 0) {
-          // no valid targets — still advance turn
-          _ipTab = 'num';
-          const found = advanceToNextActive(fromIdx);
-          G.save(); render();
-          if (!found) checkRoundEnd();
-          return;
-        }
         const fList = document.getElementById('freeze-targets');
         fList.innerHTML = '';
-        targets.forEach(({ p, i }) => {
+        targets.forEach(({ p, i, active, status }) => {
           const el = document.createElement('div');
           el.className = 'freeze-target';
+          if (!active) el.style.opacity = '0.5';
+          if (!active) el.style.pointerEvents = 'none';
+
+          let badgeHtml = '';
+          if (status === 'busted') badgeHtml = `<span class="badge badge-red" style="margin-left:8px;">BUST</span>`;
+          else if (status === 'stayed') badgeHtml = `<span class="badge badge-gold" style="margin-left:8px;">PAROU</span>`;
+
           el.innerHTML = `
         <div class="ft-av ${p.avatar}">${p.name.slice(0, 2).toUpperCase()}</div>
-        <div class="ft-name">${esc(p.name)}</div>
+        <div class="ft-name">${esc(p.name)}${badgeHtml}</div>
         <div class="ft-pts">${s.scores[i]} pts</div>
       `;
-          el.onclick = () => applyFreeze(fromIdx, i);
+          if (active) el.onclick = () => applyFreeze(fromIdx, i);
           fList.appendChild(el);
         });
         openModal('modal-freeze');
@@ -3391,6 +3379,7 @@
         closeModalEl('modal-freeze');
         const s = G.state;
         s.dPlayerStates[targetIdx].status = 'frozen';
+        s.dPlayerStates[targetIdx].frozenTurns = 1; // Only skip 1 turn
         _ipTab = 'num';
         // advance from fromIdx (the player who played freeze, not the target)
         // if target===from, that player is now frozen so advanceToNextActive skips them
@@ -3409,15 +3398,24 @@
 
         // All active players (including self) can be targeted
         s.players.forEach((p, i) => {
-          if (s.dPlayerStates[i].status !== 'active') return;
+          const active = s.dPlayerStates[i].status === 'active';
+          const status = s.dPlayerStates[i].status;
+
           const el = document.createElement('div');
           el.className = 'freeze-target';
+          if (!active) el.style.opacity = '0.5';
+          if (!active) el.style.pointerEvents = 'none';
+
+          let badgeHtml = '';
+          if (status === 'busted') badgeHtml = `<span class="badge badge-red" style="margin-left:8px;">BUST</span>`;
+          else if (status === 'stayed') badgeHtml = `<span class="badge badge-gold" style="margin-left:8px;">PAROU</span>`;
+
           el.innerHTML = `
         <div class="ft-av ${p.avatar}">${p.name.slice(0, 2).toUpperCase()}</div>
-        <div class="ft-name">${esc(p.name)}${i === fromIdx ? ' (você)' : ''}</div>
+        <div class="ft-name">${esc(p.name)}${i === fromIdx ? ' (você)' : ''}${badgeHtml}</div>
         <div class="ft-pts">${s.scores[i]} pts</div>
       `;
-          el.onclick = () => startFlipThree(fromIdx, i);
+          if (active) el.onclick = () => startFlipThree(fromIdx, i);
           fList.appendChild(el);
         });
 
