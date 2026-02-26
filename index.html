@@ -1418,6 +1418,13 @@
       border-top: 1px solid rgba(255, 255, 255, .06);
       background: var(--dark2);
       padding: 10px 14px 12px;
+      min-height: 230px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #ip-content {
+      flex: 1;
     }
 
     .ip-tabs {
@@ -2312,8 +2319,6 @@
               <span>🃏</span><span>Cartas</span>
             </div>
           </div>
-          <button class="btn btn-ghost btn-icon" onclick="Simple.confirmEnd()" title="Encerrar"
-            style="font-size:15px">✓</button>
         </div>
       </div>
       <div class="scoreboard-scroll" id="s-scoreboard"></div>
@@ -3159,7 +3164,12 @@
         const s = G.state;
         const ps = s.dPlayerStates[s.dCurrentIdx];
         if (ps.status !== 'active') return;
-        // reset tab to num each new turn
+
+        // Sync tabs logically and visually
+        document.querySelectorAll('.ip-tab').forEach(t => {
+          t.classList.toggle('on', t.dataset.tab === _ipTab);
+        });
+
         renderIpContent(_ipTab);
       }
 
