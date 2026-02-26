@@ -88,7 +88,7 @@ function openCardModal(index) {
   document.getElementById("modalPlayerName").innerText = players[index].name;
   buildCardButtons();
   document.getElementById("roundPreview").innerText = 0;
-  document.getElementById("cardModal").classList.remove("hidden");
+  document.getElementById("cardModal").classList.add("active");
 }
 
 function buildCardButtons() {
@@ -156,7 +156,7 @@ function confirmCards() {
 }
 
 function closeModal() {
-  document.getElementById("cardModal").classList.add("hidden");
+  document.getElementById("cardModal").classList.remove("active");
 }
 
 function resetGame() {

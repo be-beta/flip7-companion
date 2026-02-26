@@ -42,9 +42,13 @@ button:hover {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.8);
-  display: flex;
+  display: none; /* importante */
   justify-content: center;
   align-items: center;
+}
+
+.modal.active {
+  display: flex;
 }
 
 .modal-content {
