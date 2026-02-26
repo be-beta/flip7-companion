@@ -1,8 +1,15 @@
 {
   "name": "Flip 7 Companion",
   "short_name": "Flip7",
-  "start_url": ".",
+  "start_url": "./",
   "display": "standalone",
-  "background_color": "#111111",
-  "theme_color": "#111111"
+  "background_color": "#0A0A16",
+  "theme_color": "#0A0A16",
+  "icons": [
+    {
+      "src": "seven-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
 }

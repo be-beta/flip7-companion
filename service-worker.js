@@ -1,10 +1,9 @@
-const CACHE_NAME = "flip7-cache-v1";
+const CACHE_NAME = "flip7-cache-v2";
 const urlsToCache = [
-  "/",
-  "/index.html",
-  "/style.css",
-  "/app.js",
-  "/manifest.json"
+  "./",
+  "./index.html",
+  "./manifest.json",
+  "./seven-icon.svg"
 ];
 
 self.addEventListener("install", event => {
