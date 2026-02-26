@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flip 7 Companion</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json" />
+</head>
+<body>
+
+<h1>Flip 7 Companion</h1>
+
+<div id="setup">
+  <input type="text" id="playerName" placeholder="Nome do jogador" />
+  <button onclick="addPlayer()">Adicionar</button>
+  <ul id="playerList"></ul>
+
+  <label>Meta:</label>
+  <input type="number" id="targetScore" value="200" />
+  <button onclick="startGame()">Iniciar Partida</button>
+</div>
+
+<div id="game" class="hidden">
+  <h2 id="roundDisplay">Rodada 1</h2>
+  <div id="playersContainer"></div>
+  <button onclick="nextRound()">Próxima Rodada</button>
+  <button onclick="resetGame()">Resetar</button>
+</div>
+
+<!-- Modal de cartas -->
+<div id="cardModal" class="modal hidden">
+  <div class="modal-content">
+    <h3 id="modalPlayerName"></h3>
+
+    <h4>Números</h4>
+    <div id="numberButtons"></div>
+
+    <h4>Modificadores</h4>
+    <div id="modifierButtons"></div>
+
+    <p>Pontuação da rodada: <strong id="roundPreview">0</strong></p>
+
+    <button onclick="confirmCards()">Confirmar</button>
+    <button onclick="closeModal()">Cancelar</button>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
+</script>
+</body>
+</html>
